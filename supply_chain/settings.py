@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-17_)rkl--ny+2(ke&(8@f_&$um0qdol)_8e6&&n-^@euxo5ubj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # Set to your backend's production domain (e.g. '.onrender.com') in a real scenario
 
 
 # Application definition
@@ -119,5 +119,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://supply-chain-guardian.vercel.app",  # Add your specific Vercel URL here
+]
 
