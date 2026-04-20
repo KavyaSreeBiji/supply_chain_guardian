@@ -463,3 +463,62 @@ body.light-theme .stock-bar-bg {
 body.light-theme .dashboard-panel h3 {
   color: var(--text-secondary);
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .app-header {
+    padding: 0 16px;
+  }
+  
+  .brand-text h1 {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .app-tabs {
+    padding: 0 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+
+  .app-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-link {
+    flex-shrink: 0;
+    padding: 12px 14px;
+  }
+
+  .app-main {
+    padding: 16px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .metric-card {
+    padding: 14px;
+  }
+
+  .metric-value {
+    font-size: 24px;
+  }
+
+  .metric-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .metric-sub {
+    font-size: 10px;
+  }
+}
