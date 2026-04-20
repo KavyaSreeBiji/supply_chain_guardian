@@ -122,6 +122,6 @@ STATIC_URL = 'static/'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://supply-chain-guardian.vercel.app",  # Add your specific Vercel URL here
+    "https://supply-chain-guardian.netlify.app",
 ]
 
