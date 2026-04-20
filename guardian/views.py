@@ -45,6 +45,35 @@ def update_inventory(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+@csrf_exempt
+def add_inventory(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+    try:
+        data = json.loads(request.body)
+        sku = data.get('sku')
+        if not sku:
+            return JsonResponse({"error": "SKU is required"}, status=400)
+            
+        if InventoryItem.objects.filter(sku=sku).exists():
+            return JsonResponse({"error": "Item with this SKU already exists"}, status=400)
+            
+        InventoryItem.objects.create(
+            sku=sku,
+            name=data.get('name', 'Unnamed Item'),
+            stock=int(data.get('stock', 0)),
+            reorder_point=int(data.get('reorder_point', 0)),
+            unit=data.get('unit', 'units'),
+            category=data.get('category', 'Uncategorized'),
+            supplier=data.get('supplier', 'Unknown Supplier'),
+            lead_days=int(data.get('lead_days', 0))
+        )
+        
+        items = list(InventoryItem.objects.values())
+        return JsonResponse(items, safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 def get_shipments(request):
     shipments = list(Shipment.objects.values())
     return JsonResponse(shipments, safe=False)

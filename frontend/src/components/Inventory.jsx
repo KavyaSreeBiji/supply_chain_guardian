@@ -1,5 +1,65 @@
 import { useState } from 'react';
 
+function AddInventoryRow({ onSave, onCancel }) {
+    const [sku, setSku] = useState("");
+    const [name, setName] = useState("");
+    const [category, setCategory] = useState("");
+    const [stock, setStock] = useState(0);
+    const [reorder, setReorder] = useState(0);
+    const [lead, setLead] = useState(0);
+    const [supplier, setSupplier] = useState("");
+
+    const handleSave = async () => {
+        if(!sku || !name) { alert("SKU and Name are required"); return; }
+        await onSave({ sku, name, category, stock, reorder_point: reorder, lead_days: lead, supplier });
+    };
+
+    return (
+        <div className="list-card" style={{borderColor: "var(--accent-blue)"}}>
+            <div className="inv-row" style={{ alignItems: "flex-end", paddingBottom: "10px" }}>
+                <div>
+                    <label style={{fontSize:"11px", color:"var(--text-muted)"}}>Name</label>
+                    <input type="text" placeholder="Item Name" value={name} onChange={e => setName(e.target.value)} style={{width:"100%", display:"block", padding:"6px", marginTop:"4px", background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", borderRadius:"4px"}} />
+                    <div style={{display:"flex", gap:"8px", marginTop:"8px"}}>
+                        <div style={{flex:1}}>
+                            <label style={{fontSize:"11px", color:"var(--text-muted)"}}>SKU</label>
+                            <input type="text" placeholder="SKU-XXX" value={sku} onChange={e => setSku(e.target.value)} style={{width:"100%", display:"block", padding:"6px", marginTop:"4px", background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", borderRadius:"4px"}} />
+                        </div>
+                        <div style={{flex:1}}>
+                            <label style={{fontSize:"11px", color:"var(--text-muted)"}}>Category</label>
+                            <input type="text" placeholder="Category" value={category} onChange={e => setCategory(e.target.value)} style={{width:"100%", display:"block", padding:"6px", marginTop:"4px", background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", borderRadius:"4px"}} />
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label style={{fontSize:"11px", color:"var(--text-muted)"}}>Stock</label>
+                    <input type="number" value={stock} onChange={e => setStock(e.target.value)} style={{width:"100%", display:"block", padding:"6px", marginTop:"4px", background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", borderRadius:"4px"}} />
+                </div>
+                <div>
+                    <div style={{display:"flex", gap:"8px"}}>
+                        <div style={{flex:1}}>
+                            <label style={{fontSize:"11px", color:"var(--text-muted)"}}>Reorder Pt</label>
+                            <input type="number" value={reorder} onChange={e => setReorder(e.target.value)} style={{width:"100%", display:"block", padding:"6px", marginTop:"4px", background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", borderRadius:"4px"}} />
+                        </div>
+                        <div style={{flex:1}}>
+                            <label style={{fontSize:"11px", color:"var(--text-muted)"}}>Lead (d)</label>
+                            <input type="number" value={lead} onChange={e => setLead(e.target.value)} style={{width:"100%", display:"block", padding:"6px", marginTop:"4px", background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", borderRadius:"4px"}} />
+                        </div>
+                    </div>
+                    <div style={{marginTop:"8px"}}>
+                        <label style={{fontSize:"11px", color:"var(--text-muted)"}}>Supplier</label>
+                        <input type="text" placeholder="Supplier" value={supplier} onChange={e => setSupplier(e.target.value)} style={{width:"100%", display:"block", padding:"6px", marginTop:"4px", background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", borderRadius:"4px"}} />
+                    </div>
+                </div>
+                <div style={{textAlign:"right", paddingBottom:"2px", alignSelf:"flex-end" }}>
+                    <button onClick={handleSave} style={{background:"var(--accent-blue)", color:"#fff", border:"none", padding:"6px 12px", borderRadius:"4px", cursor:"pointer", fontSize:"12px", fontWeight:"600", width:"100%", marginBottom:"8px"}}>Add Item</button>
+                    <button onClick={onCancel} style={{background:"var(--bg-dark)", color:"var(--text-primary)", border:"1px solid var(--border-light)", padding:"5px 12px", borderRadius:"4px", cursor:"pointer", fontSize:"12px", width:"100%"}}>Cancel</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function InventoryRow({ item, onSave }) {
     const [isEditing, setIsEditing] = useState(false);
     const [stock, setStock] = useState(item.stock);
@@ -93,6 +153,27 @@ function InventoryRow({ item, onSave }) {
 }
 
 function Inventory({ inventoryData, updateInventory }) {
+    const [isAdding, setIsAdding] = useState(false);
+
+    const submitAdd = async (newItem) => {
+        try {
+            const res = await fetch('/api/inventory/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newItem)
+            });
+            const data = await res.json();
+            if(!data.error) {
+                updateInventory(data);
+                setIsAdding(false);
+            } else {
+                alert(data.error);
+            }
+        } catch(e) {
+            alert("Error adding item.");
+        }
+    };
+
     const handleSave = async (sku, { stock, reorder, lead }) => {
         try {
             const res = await fetch('/api/inventory/update', {
@@ -118,10 +199,12 @@ function Inventory({ inventoryData, updateInventory }) {
 
     return (
         <section id="inventory">
-            <div className="section-header">
-                <h2>Inventory Operations</h2>
+            <div className="section-header" style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"20px"}}>
+                <h2 style={{marginBottom: 0}}>Inventory Operations</h2>
+                <button onClick={() => setIsAdding(true)} style={{background:"var(--accent-blue)", color:"#fff", border:"none", padding:"8px 16px", borderRadius:"6px", cursor:"pointer", fontSize:"13px", fontWeight:"600"}}>+ Add Item</button>
             </div>
             <div className="inventory-grid">
+                {isAdding && <AddInventoryRow onSave={submitAdd} onCancel={() => setIsAdding(false)} />}
                 {inventoryData.map(item => (
                     <InventoryRow key={item.sku} item={item} onSave={handleSave} />
                 ))}
